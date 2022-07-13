@@ -40,47 +40,24 @@ public class DataGeneratorService : IDataGeneratorService
         const int personsToGenerateCount = 5;
         var schema = this.schemaService.GetSchema();
 
-        var personTable = schema["Person"];
-        schema.Remove("Person");
-        var tableColumns = personTable.Columns.Where(c => c.Name != AutoIncrColName).ToList();
-        var columnNames = tableColumns.Select(c => c.Name).ToList();
-        var columnValues = columnNames.Select(c => $"@{c}").ToList();
-        string query =
-            $"INSERT INTO {personTable.TableName} ({string.Join(",", columnNames)}) VALUES ({string.Join(",", columnValues)})";
-
         for (int i = 0; i < personsToGenerateCount; i++)
         {
-            var command = new SqlCommand(query, this.Connection);
-            foreach (var col in tableColumns)
-            {
-                object value;
-                if (col.Name.Equals("custid", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    value = Guid.NewGuid();
-                    this.GenerateDataForCustomer((Guid)value, schema, locationId);
-                }
-                else
-                {
-                    value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLenght, locationId);
-                }
-
-                command.Parameters.AddWithValue($"@{col.Name}", value);
-            }
-
-            command.ExecuteNonQuery();
+            this.GenerateDataForCustomer(schema, locationId);
         }
     }
 
-    private void GenerateDataForCustomer(Guid custId, Dictionary<string, TableDto> schema, int locationId)
+    private void GenerateDataForCustomer(Dictionary<string, TableDto> schema, int locationId)
     {
+        var custId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
         var orderedTables = schema.OrderBy(a => a.Value.Order);
         foreach (var table in orderedTables)
         {
-            this.InsertData(custId, table.Value, locationId);
+            this.InsertData(custId, orderId, table.Value, locationId);
         }
     }
 
-    private void InsertData(Guid custId, TableDto table, int locationId)
+    private void InsertData(Guid custId, Guid orderId, TableDto table, int locationId)
     {
         var tableColumns = table.Columns.Where(c => c.Name != AutoIncrColName).ToList();
         var columnNames = tableColumns.Select(c => c.Name).ToList();
@@ -91,9 +68,19 @@ public class DataGeneratorService : IDataGeneratorService
         var command = new SqlCommand(query, this.Connection);
         foreach (var col in tableColumns)
         {
-            object value = col.Name.Equals("custid", StringComparison.InvariantCultureIgnoreCase)
-                ? custId
-                : this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLenght, locationId);
+            object value;
+            if (col.Name.Equals("custid", StringComparison.InvariantCultureIgnoreCase))
+            {
+                value = custId;
+            }
+            else if (col.Name.Equals("orderid", StringComparison.InvariantCultureIgnoreCase))
+            {
+                value = orderId;
+            }
+            else
+            {
+                value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLenght, locationId);
+            }
 
             command.Parameters.AddWithValue($"@{col.Name}", value);
         }

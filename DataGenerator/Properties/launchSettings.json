@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "TestNet6": {
+    "DataGenerator": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

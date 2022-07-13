@@ -1,0 +1,29 @@
+# Vim files
+*.swp
+
+# Rider files
+.idea
+
+# .NET files
+obj/
+bin/
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Unit test coverage
+coverage.opencover.xml
+
+# app generated
+logs/
+
+# VS Code files
+.vscode
+
+# User Defined
+appsettings.Development.json
+publish/*
