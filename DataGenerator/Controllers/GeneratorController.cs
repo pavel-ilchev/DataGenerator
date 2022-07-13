@@ -12,7 +12,7 @@ public class GeneratorController : ControllerBase
 
     public GeneratorController(IDatabaseSchemaService databaseSchemaService, IDataGeneratorService generatorService)
     {
-        this.databaseSchemaService = databaseSchemaService;
+        this.databaseSchemaService =  databaseSchemaService;
         this.generatorService = generatorService;
     }
 
