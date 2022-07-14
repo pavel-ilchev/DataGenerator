@@ -27,3 +27,4 @@ logs/
 # User Defined
 appsettings.Development.json
 publish/*
+DataGenerator/appsettings.json

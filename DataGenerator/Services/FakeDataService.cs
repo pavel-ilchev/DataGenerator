@@ -1,6 +1,7 @@
 namespace DataGenerator.Services;
 
 using Faker;
+using Interfaces;
 using Models.Enums;
 
 public class FakeDataService : IFakeDataService
@@ -56,6 +57,13 @@ public class FakeDataService : IFakeDataService
         return result;
     }
 
+
+    public static string RandomNumber(int length)
+    {
+        const string chars = "0123456789";
+        return new string(Enumerable.Repeat(chars, length).Select(s => s[rnd.Next(s.Length)]).ToArray());
+    }
+
     private string GetStringData(string columnName, string maxLength, int index)
     {
         var type = this.DefineColumnType(columnName);
@@ -87,7 +95,7 @@ public class FakeDataService : IFakeDataService
                 result = Name.LastName();
                 break;
             case ColumnType.Phone:
-                result = $"555{Number.RandomNumber(7)}";
+                result = $"555{RandomNumber(7)}";
                 break;
             case ColumnType.Vehicle:
                 result = this.GetVehicleData(columnName);

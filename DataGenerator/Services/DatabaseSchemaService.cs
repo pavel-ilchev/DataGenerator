@@ -1,6 +1,7 @@
 namespace DataGenerator.Services;
 
 using System.Data;
+using Interfaces;
 using Microsoft.Data.SqlClient;
 using Models;
 

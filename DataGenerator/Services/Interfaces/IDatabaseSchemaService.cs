@@ -1,4 +1,4 @@
-namespace DataGenerator.Services;
+namespace DataGenerator.Services.Interfaces;
 
 using Models;
 
