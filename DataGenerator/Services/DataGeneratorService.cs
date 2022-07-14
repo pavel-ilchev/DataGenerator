@@ -35,12 +35,11 @@ public class DataGeneratorService : IDataGeneratorService
         }
     }
 
-    public void GeneratePosData(int locationId)
+    public void GeneratePosData(int locationId, int customersCount)
     {
-        const int personsToGenerateCount = 5;
         var schema = this.schemaService.GetSchema();
 
-        for (int i = 0; i < personsToGenerateCount; i++)
+        for (int i = 0; i < customersCount; i++)
         {
             this.GenerateDataForCustomer(schema, locationId);
         }
@@ -79,7 +78,7 @@ public class DataGeneratorService : IDataGeneratorService
             }
             else
             {
-                value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLenght, locationId);
+                value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLength, locationId);
             }
 
             command.Parameters.AddWithValue($"@{col.Name}", value);

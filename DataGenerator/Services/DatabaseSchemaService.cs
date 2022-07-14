@@ -61,7 +61,7 @@ public class DatabaseSchemaService : IDatabaseSchemaService
                 //row _columns is mapping for row ItemArray 
                 int ordinalPosition = int.Parse(row["ORDINAL_POSITION"].ToString());
                 string colType = row["DATA_TYPE"].ToString();
-                string colMaxLenght = row["CHARACTER_MAXIMUM_LENGTH"].ToString();
+                string colMaxLength = row["CHARACTER_MAXIMUM_LENGTH"].ToString();
                 int numericPrecision = !string.IsNullOrEmpty(row["NUMERIC_PRECISION"].ToString())
                     ? int.Parse(row["NUMERIC_PRECISION"].ToString())
                     : 0;
@@ -73,7 +73,7 @@ public class DatabaseSchemaService : IDatabaseSchemaService
                     OrdinalPosition = ordinalPosition,
                     Name = colName,
                     Type = colType,
-                    StringMaxLenght = colMaxLenght,
+                    StringMaxLength = colMaxLength,
                     NumericPrecision = numericPrecision,
                     NumericScale = numericScale
                 });

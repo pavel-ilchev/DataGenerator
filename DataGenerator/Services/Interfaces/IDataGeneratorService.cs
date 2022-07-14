@@ -2,5 +2,5 @@ namespace DataGenerator.Services;
 
 public interface IDataGeneratorService
 {
-    void GeneratePosData(int locationId);
+    void GeneratePosData(int locationId, int customersCount);
 }

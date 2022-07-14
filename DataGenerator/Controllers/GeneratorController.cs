@@ -17,9 +17,9 @@ public class GeneratorController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Generate(int locationId)
+    public IActionResult Generate(int locationId, int customersCount = 5)
     {
-        this.generatorService.GeneratePosData(locationId);
+        this.generatorService.GeneratePosData(locationId, customersCount);
 
         return this.Ok();
     }
