@@ -8,6 +8,16 @@ public class DataGeneratorService : IDataGeneratorService
     private const string AutoIncrColName = "RowId";
     private readonly string connectionString;
     private readonly IFakeDataService fakeDataService;
+
+    private readonly List<string> multiLinesTables = new()
+    {
+        "Appointments",
+        "Orders",
+        "Recommendations",
+        "Labors",
+        "Vehicles"
+    };
+
     private readonly IDatabaseSchemaService schemaService;
     private SqlConnection connectionInstance;
 
@@ -59,15 +69,26 @@ public class DataGeneratorService : IDataGeneratorService
     private void GenerateDataForCustomer(Dictionary<string, TableDto> schema, int locationId)
     {
         var custId = Guid.NewGuid();
-        var orderId = Guid.NewGuid();
         var orderedTables = schema.OrderBy(a => a.Value.Order);
+        int rows = FakeDataService.rnd.Next(1, 6);
+        var orderIds = new List<Guid>();
+        for (int i = 0; i < rows; i++)
+        {
+            orderIds.Add(Guid.NewGuid());
+        }
+
         foreach (var table in orderedTables)
         {
-            this.InsertData(custId, orderId, table.Value, locationId);
+            bool isMultiLine = this.multiLinesTables.Any(t => table.Value.TableName.Contains(t));
+            int rowsCount = isMultiLine ? rows : 1;
+            for (int i = 0; i < rowsCount; i++)
+            {
+                this.InsertData(custId, orderIds[i], table.Value, locationId, i);
+            }
         }
     }
 
-    private void InsertData(Guid custId, Guid orderId, TableDto table, int locationId)
+    private void InsertData(Guid custId, Guid orderId, TableDto table, int locationId, int index)
     {
         var tableColumns = table.Columns.Where(c => c.Name != AutoIncrColName).ToList();
         var columnNames = tableColumns.Select(c => c.Name).ToList();
@@ -89,7 +110,7 @@ public class DataGeneratorService : IDataGeneratorService
             }
             else
             {
-                value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLength, locationId);
+                value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLength, locationId, index);
             }
 
             command.Parameters.AddWithValue($"@{col.Name}", value ?? DBNull.Value);

@@ -19,17 +19,10 @@ public class DatabaseSchemaService : IDatabaseSchemaService
 
     public Dictionary<string, TableDto> GetSchema()
     {
-        //this.CopyDatabase();
         var result = new Dictionary<string, TableDto>();
         using var connection = new SqlConnection(this.connectionString);
         connection.Open();
         var data = connection.GetSchema("Tables");
-
-        //Get dependancies
-        // var oleConnection = new OleDbConnection(this.connectionStringOle);
-        // oleConnection.Open();
-        // string[] restrictions = { null };
-        // var dt = oleConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Foreign_Keys, restrictions);
 
 
         foreach (DataRow dataRow in data.Rows)
@@ -38,7 +31,6 @@ public class DatabaseSchemaService : IDatabaseSchemaService
             string tableSchema = dataRow["TABLE_SCHEMA"].ToString();
             string tableName = dataRow["TABLE_NAME"].ToString();
             if (string.IsNullOrEmpty(tableName) ||
-                // !this.tableForPopulating.Contains(tableName) ||
                 tableName.Equals("sysdiagrams", StringComparison.CurrentCultureIgnoreCase))
             {
                 continue;

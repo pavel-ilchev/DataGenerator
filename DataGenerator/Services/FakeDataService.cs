@@ -5,7 +5,7 @@ using Models.Enums;
 
 public class FakeDataService : IFakeDataService
 {
-    private static readonly Random rnd = new();
+    public static readonly Random rnd = new();
 
     private readonly Dictionary<string, List<string>> ModelsByMake = new()
     {
@@ -22,7 +22,7 @@ public class FakeDataService : IFakeDataService
 
     private string lastMake;
 
-    public object GetFakeData(string columnName, string type, string maxLength, int locationId)
+    public object GetFakeData(string columnName, string type, string maxLength, int locationId, int index)
     {
         object result;
         switch (type)
@@ -36,16 +36,14 @@ public class FakeDataService : IFakeDataService
                 break;
             case "varchar":
             case "nvarchar":
-                result = columnName.Contains("custid", StringComparison.InvariantCultureIgnoreCase)
-                    ? Guid.NewGuid()
-                    : this.GetStringData(columnName, maxLength);
+                result = this.GetStringData(columnName, maxLength, index);
                 break;
             case "bit":
                 result = rnd.Next(2) > 0;
                 break;
             case "date":
             case "smalldatetime":
-                result = this.GetDate(columnName);
+                result = this.GetDate(columnName, index);
                 break;
             case "decimal":
                 result = rnd.Next(255);
@@ -58,7 +56,7 @@ public class FakeDataService : IFakeDataService
         return result;
     }
 
-    private string GetStringData(string columnName, string maxLength)
+    private string GetStringData(string columnName, string maxLength, int index)
     {
         var type = this.DefineColumnType(columnName);
         string result;
@@ -113,7 +111,7 @@ public class FakeDataService : IFakeDataService
         return result;
     }
 
-    private DateTime? GetDate(string columnName)
+    private DateTime? GetDate(string columnName, int index)
     {
         DateTime? date = DateTime.Now;
         if (columnName.Contains("update", StringComparison.InvariantCultureIgnoreCase) ||
@@ -139,10 +137,11 @@ public class FakeDataService : IFakeDataService
         else if (columnName.Contains("open", StringComparison.InvariantCultureIgnoreCase))
         {
             int daysBack = rnd.Next(12);
-            date = DateTime.Now.AddMonths(-daysBack);
+            date = DateTime.Now.AddDays(-daysBack);
         }
 
-        return date;
+        // for the every next row for the same customer subtract 3 months
+        return date?.AddMonths(-index * 3) ?? date;
     }
 
     private ColumnType DefineColumnType(string columnName)
