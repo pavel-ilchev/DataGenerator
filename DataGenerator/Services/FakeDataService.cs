@@ -64,6 +64,11 @@ public class FakeDataService : IFakeDataService
         return new string(Enumerable.Repeat(chars, length).Select(s => s[rnd.Next(s.Length)]).ToArray());
     }
 
+    public static string RandomPhoneNumber()
+    {
+        return $"555{RandomNumber(7)}";
+    }
+
     private string GetStringData(string columnName, string maxLength, int index)
     {
         var type = this.DefineColumnType(columnName);
@@ -95,7 +100,7 @@ public class FakeDataService : IFakeDataService
                 result = Name.LastName();
                 break;
             case ColumnType.Phone:
-                result = $"555{RandomNumber(7)}";
+                result = RandomPhoneNumber();
                 break;
             case ColumnType.Vehicle:
                 result = this.GetVehicleData(columnName);
@@ -141,6 +146,10 @@ public class FakeDataService : IFakeDataService
         {
             int monthsBack = rnd.Next(12);
             date = DateTime.Now.AddMonths(-monthsBack);
+        }
+        else if (columnName.Contains("last", StringComparison.InvariantCultureIgnoreCase))
+        {
+            date = DateTime.Now.AddDays(-1);
         }
         else if (columnName.Contains("open", StringComparison.InvariantCultureIgnoreCase))
         {
