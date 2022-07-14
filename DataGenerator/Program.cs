@@ -2,8 +2,6 @@ using DataGenerator.Database;
 using DataGenerator.Services;
 using DataGenerator.Services.Interfaces;
 using KAPIClient.Models;
-using KAPIClient.Services;
-using KAPIClient.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,8 +19,8 @@ builder.Services.AddScoped<IDatabaseSchemaService, DatabaseSchemaService>();
 builder.Services.AddScoped<IDataGeneratorService, DataGeneratorService>();
 builder.Services.AddScoped<IFakeDataService, FakeDataService>();
 builder.Services.AddScoped<IClientCreatorService, ClientCreatorService>();
-builder.Services.AddScoped<IClientServices, ClientServices>();
-builder.Services.Configure<KapiAppSettings>(builder.Configuration.GetSection("Kapi"));
+
+builder.Services.Configure<KapiAppSettings>(builder.Configuration.GetSection("Kapi:AppSettings"));
 builder.Services.AddSingleton<IKapiFactoryService, KapiFactoryService>();
 builder.Services.AddSingleton(provider => provider.GetService<IKapiFactoryService>().CreateKapi());
 

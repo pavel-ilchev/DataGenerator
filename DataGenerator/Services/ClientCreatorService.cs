@@ -5,6 +5,8 @@ using Interfaces;
 using KAPIClient;
 using KAPIClient.Exceptions;
 using KAPIClient.Models;
+using Client = KAPIClient.Models.Client;
+using Location = Database.CpEntities.Location;
 
 public class ClientCreatorService : IClientCreatorService
 {
@@ -21,6 +23,19 @@ public class ClientCreatorService : IClientCreatorService
     {
         int clientId = this.CreateClientInDatabase(clientName, aspnetId);
         this.CreateClientInKapi(clientName, clientId);
+        for (int i = 0; i < locationsCount; i++)
+        {
+            string locationName = locationsCount > 1 ? $"{clientName} - {i + 1}" : clientName;
+            this.CreateLocationInDatabase(clientId, locationName);
+        }
+    }
+
+    private void CreateLocationInDatabase(int clientId, string locationName)
+    {
+        var location = new Location { ClientId = clientId };
+
+        this.context.Locations.Add(location);
+        this.context.SaveChanges();
     }
 
     private void CreateClientInKapi(string clientName, int clientId)
