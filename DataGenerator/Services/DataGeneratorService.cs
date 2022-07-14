@@ -45,6 +45,17 @@ public class DataGeneratorService : IDataGeneratorService
         }
     }
 
+    public void DeletePosData(int locationId)
+    {
+        var schema = this.schemaService.GetSchema();
+        foreach (var table in schema)
+        {
+            string query = $"DELETE FROM {table.Value.TableName} WHERE locationId = {locationId}";
+            var command = new SqlCommand(query, this.Connection);
+            command.ExecuteNonQuery();
+        }
+    }
+
     private void GenerateDataForCustomer(Dictionary<string, TableDto> schema, int locationId)
     {
         var custId = Guid.NewGuid();
@@ -81,7 +92,7 @@ public class DataGeneratorService : IDataGeneratorService
                 value = this.fakeDataService.GetFakeData(col.Name, col.Type, col.StringMaxLength, locationId);
             }
 
-            command.Parameters.AddWithValue($"@{col.Name}", value);
+            command.Parameters.AddWithValue($"@{col.Name}", value ?? DBNull.Value);
         }
 
         command.ExecuteNonQuery();

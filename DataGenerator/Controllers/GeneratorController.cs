@@ -23,4 +23,12 @@ public class GeneratorController : ControllerBase
 
         return this.Ok();
     }
+
+    [HttpDelete]
+    public IActionResult Delete(int locationId)
+    {
+        this.generatorService.DeletePosData(locationId);
+
+        return this.Ok();
+    }
 }

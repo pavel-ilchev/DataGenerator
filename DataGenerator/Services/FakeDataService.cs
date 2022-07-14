@@ -58,11 +58,6 @@ public class FakeDataService : IFakeDataService
         return result;
     }
 
-    private DateTime GetDate(string columnName)
-    {
-        return DateTime.Now;
-    }
-
     private string GetStringData(string columnName, string maxLength)
     {
         var type = this.DefineColumnType(columnName);
@@ -118,10 +113,43 @@ public class FakeDataService : IFakeDataService
         return result;
     }
 
+    private DateTime? GetDate(string columnName)
+    {
+        DateTime? date = DateTime.Now;
+        if (columnName.Contains("update", StringComparison.InvariantCultureIgnoreCase) ||
+            columnName.Contains("create", StringComparison.InvariantCultureIgnoreCase))
+        {
+            date = DateTime.Now;
+        }
+        else if (columnName.Contains("delete", StringComparison.InvariantCultureIgnoreCase))
+        {
+            bool isDeleted = rnd.Next(11) > 9;
+            date = isDeleted ? DateTime.Now : null;
+        }
+        else if (columnName.Contains("birth", StringComparison.InvariantCultureIgnoreCase))
+        {
+            int monthsBack = rnd.Next(252, 1200);
+            date = DateTime.Now.AddMonths(-monthsBack);
+        }
+        else if (columnName.Contains("first", StringComparison.InvariantCultureIgnoreCase))
+        {
+            int monthsBack = rnd.Next(12);
+            date = DateTime.Now.AddMonths(-monthsBack);
+        }
+        else if (columnName.Contains("open", StringComparison.InvariantCultureIgnoreCase))
+        {
+            int daysBack = rnd.Next(12);
+            date = DateTime.Now.AddMonths(-daysBack);
+        }
+
+        return date;
+    }
+
     private ColumnType DefineColumnType(string columnName)
     {
         var type = ColumnType.Unknown;
-        if (columnName.EndsWith("id", StringComparison.InvariantCultureIgnoreCase))
+        if (columnName.EndsWith("id", StringComparison.InvariantCultureIgnoreCase) ||
+            columnName.EndsWith("ordernumber", StringComparison.InvariantCultureIgnoreCase))
         {
             type = ColumnType.Identifier;
         }
