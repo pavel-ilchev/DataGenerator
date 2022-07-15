@@ -13,12 +13,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CpContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("CpEntities")));
-builder.Services.AddDbContext<PosUpdateContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("PosupdateEntities")));
+builder.Services.AddDbContext<PosUpdateContext>(x =>
+    x.UseSqlServer(builder.Configuration.GetConnectionString("PosupdateEntities")));
 
 builder.Services.AddScoped<IDatabaseSchemaService, DatabaseSchemaService>();
-builder.Services.AddScoped<IDataGeneratorService, DataGeneratorService>();
+builder.Services.AddScoped<IPosDataGeneratorService, PosPosDataGeneratorService>();
 builder.Services.AddScoped<IFakeDataService, FakeDataService>();
 builder.Services.AddScoped<IClientCreatorService, ClientCreatorService>();
+builder.Services.AddScoped<ICpDataGeneratorService, CpDataGeneratorService>();
 
 builder.Services.Configure<KapiAppSettings>(builder.Configuration.GetSection("Kapi:AppSettings"));
 builder.Services.AddSingleton<IKapiFactoryService, KapiFactoryService>();

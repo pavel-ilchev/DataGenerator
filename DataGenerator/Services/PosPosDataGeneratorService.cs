@@ -4,10 +4,11 @@ using Interfaces;
 using Microsoft.Data.SqlClient;
 using Models;
 
-public class DataGeneratorService : IDataGeneratorService
+public class PosPosDataGeneratorService : IPosDataGeneratorService
 {
     private const string AutoIncrColName = "RowId";
     private readonly string connectionString;
+    private readonly string connectionStringSource;
     private readonly IFakeDataService fakeDataService;
 
     private readonly List<string> multiLinesTables = new()
@@ -20,9 +21,11 @@ public class DataGeneratorService : IDataGeneratorService
     };
 
     private readonly IDatabaseSchemaService schemaService;
+
+    private readonly List<string> tableOrder = new() { "Person", "Orders" };
     private SqlConnection connectionInstance;
 
-    public DataGeneratorService(
+    public PosPosDataGeneratorService(
         IDatabaseSchemaService schemaService,
         IConfiguration configuration,
         IFakeDataService fakeDataService)
@@ -30,6 +33,7 @@ public class DataGeneratorService : IDataGeneratorService
         this.schemaService = schemaService;
         this.fakeDataService = fakeDataService;
         this.connectionString = configuration.GetConnectionString("DestinationEntities");
+        this.connectionStringSource = configuration.GetConnectionString("Entities");
     }
 
     private SqlConnection Connection
@@ -48,7 +52,7 @@ public class DataGeneratorService : IDataGeneratorService
 
     public void GeneratePosData(int locationId, int customersCount)
     {
-        var schema = this.schemaService.GetSchema();
+        var schema = this.schemaService.GetSchema(this.connectionStringSource, this.tableOrder);
 
         for (int i = 0; i < customersCount; i++)
         {
@@ -58,7 +62,7 @@ public class DataGeneratorService : IDataGeneratorService
 
     public void DeletePosData(int locationId)
     {
-        var schema = this.schemaService.GetSchema();
+        var schema = this.schemaService.GetSchema(this.connectionStringSource, this.tableOrder);
         foreach (var table in schema)
         {
             string query = $"DELETE FROM {table.Value.TableName} WHERE locationId = {locationId}";

@@ -43,6 +43,7 @@ public class FakeDataService : IFakeDataService
                 result = rnd.Next(2) > 0;
                 break;
             case "date":
+            case "datetime":
             case "smalldatetime":
                 result = this.GetDate(columnName, index);
                 break;
@@ -115,7 +116,7 @@ public class FakeDataService : IFakeDataService
             default:
                 int charCount = rnd.Next(10, 50);
                 int.TryParse(maxLength, out int length);
-                charCount = charCount > length ? length : charCount;
+                charCount = length > 0 && charCount > length ? length : charCount;
                 string? lorem = Lorem.Sentence(20);
                 result = lorem.Substring(0, charCount);
                 break;
@@ -192,7 +193,9 @@ public class FakeDataService : IFakeDataService
         {
             type = ColumnType.Email;
         }
-        else if (columnName.Contains("phone", StringComparison.InvariantCultureIgnoreCase))
+        else if (columnName.Contains("phone", StringComparison.InvariantCultureIgnoreCase) ||
+                 columnName.Equals("from", StringComparison.InvariantCultureIgnoreCase) ||
+                 columnName.Equals("to", StringComparison.InvariantCultureIgnoreCase))
         {
             type = ColumnType.Phone;
         }
