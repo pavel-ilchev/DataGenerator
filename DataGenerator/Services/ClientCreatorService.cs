@@ -13,30 +13,60 @@ using Location = Database.CpEntities.Location;
 
 public class ClientCreatorService : IClientCreatorService
 {
-    private readonly CpContext context;
+    private readonly CpContext cpContext;
+    private readonly PosUpdateContext posUpdateContext;
+
     private readonly IKAPI kapi;
     private readonly IDataGeneratorService dataGeneratorService;
 
-    public ClientCreatorService(CpContext context, IKAPI kapi, IDataGeneratorService dataGeneratorService)
+    public ClientCreatorService(
+        CpContext cpContext,
+        PosUpdateContext posUpdateContext,
+        IKAPI kapi,
+        IDataGeneratorService dataGeneratorService)
     {
-        this.context = context;
+        this.cpContext = cpContext;
+        this.posUpdateContext = posUpdateContext;
         this.kapi = kapi;
         this.dataGeneratorService = dataGeneratorService;
     }
 
     public void CreateClient(string clientName, int locationsCount, Guid aspnetId)
     {
-        int clientId = this.CreateClientInDatabase(clientName, aspnetId);
-        this.CreateClientInKapi(clientName, clientId);
+        var client = this.CreateClientInDatabase(clientName, aspnetId);
+        this.CreateClientInPosupdate(client);
+        this.CreateClientInKapi(clientName, client.Id);
         for (int i = 0; i < locationsCount; i++)
         {
             string locationName = locationsCount > 1 ? $"{clientName} - {i + 1}" : clientName;
-            Location location = this.CreateLocationInDatabase(clientId, locationName);
+            Location location = this.CreateLocationInDatabase(client.Id, locationName);
             LocationsInfo locationInfo = this.CreateLocationInfoInDatabase(location);
+            this.CreateLocationInPosupdate(location);
             this.CreateClientLocationInDatabase(location, locationInfo);
             this.CreateLocationInKapi(location, locationInfo);
             this.dataGeneratorService.GeneratePosData(location.Id, 10);
         }
+    }
+    
+    private Database.CpEntities.Client CreateClientInDatabase(string clientName, Guid aspnetId)
+    {
+        var client = new Database.CpEntities.Client
+        {
+            Aspnetid = aspnetId,
+            Name = clientName,
+            Phone = FakeDataService.RandomPhoneNumber(),
+            Units = "Miles",
+            PlatformVersion = 2,
+            IndustryId = 1,
+            Url = Faker.Internet.DomainUrl(),
+            ClientPath = Regex.Replace(Regex.Replace(clientName, "[\\\\/]", "-"), @"[^0-9a-zA-Z\._]", string.Empty)
+                .Replace(".", string.Empty)
+        };
+
+        this.cpContext.Clients.Add(client);
+        this.cpContext.SaveChanges();
+
+        return client;
     }
 
     private Location CreateLocationInDatabase(int clientId, string locationName)
@@ -56,8 +86,8 @@ public class ClientCreatorService : IClientCreatorService
             LocCountryAbbreviation = "US"
         };
 
-        this.context.Locations.Add(location);
-        this.context.SaveChanges();
+        this.cpContext.Locations.Add(location);
+        this.cpContext.SaveChanges();
 
         return location;
     }
@@ -75,8 +105,8 @@ public class ClientCreatorService : IClientCreatorService
             TrackingPhone = FakeDataService.RandomPhoneNumber()
         };
 
-        this.context.Add(locationInfo);
-        this.context.SaveChanges();
+        this.cpContext.Add(locationInfo);
+        this.cpContext.SaveChanges();
 
         return locationInfo;
     }
@@ -94,8 +124,8 @@ public class ClientCreatorService : IClientCreatorService
             Zip = location.LocPostCode
         };
 
-        context.Add(clientLocation);
-        context.SaveChanges();
+        cpContext.Add(clientLocation);
+        cpContext.SaveChanges();
     }
 
     private void CreateClientInKapi(string clientName, int clientId)
@@ -152,26 +182,38 @@ public class ClientCreatorService : IClientCreatorService
         }
     }
 
-
-    private int CreateClientInDatabase(string clientName, Guid aspnetId)
+    private void CreateClientInPosupdate(Database.CpEntities.Client client)
     {
-        var client = new Database.CpEntities.Client
+        var posupdateClient = new Database.PosUpdateEntities.Client()
         {
-            Aspnetid = aspnetId,
-            Name = clientName,
-            Phone = FakeDataService.RandomPhoneNumber(),
-            Units = "Miles",
-            PlatformVersion = 2,
-            IndustryId = 1,
-            Url = Faker.Internet.DomainUrl(),
-            ClientPath = Regex.Replace(Regex.Replace(clientName, "[\\\\/]", "-"), @"[^0-9a-zA-Z\._]", string.Empty)
-                .Replace(".", string.Empty)
+            Aspnetid = client.Aspnetid,
+            Cp = 1,
+            Name = client.Name,
+            ClientId = client.Id,
+            PlatformVersion = client.PlatformVersion
         };
 
-        this.context.Clients.Add(client);
-        this.context.SaveChanges();
+        this.posUpdateContext.Add(posupdateClient);
+        this.posUpdateContext.SaveChanges();
+    }
+    
+    private void CreateLocationInPosupdate(Location location)
+    {
+        var posupdateLocation = new Database.PosUpdateEntities.Location()
+        {
+            Cp = 1,
+            ClientId = location.ClientId,
+            LocationId = location.Id,
+            Name = location.Name,
+            Guid = location.Guid,
+            Posid = location.Posid,
+            TimeZoneId = location.TimeZoneId,
+            Country = "US",
+            PosSubVersionId = 34
+        };
 
-        return client.Id;
+        this.posUpdateContext.Add(posupdateLocation);
+        this.posUpdateContext.SaveChanges();
     }
 
     private List<WorkTime> GenerateDefaultWorktime()

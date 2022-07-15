@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<DataContext>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CpContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("CpEntities")));
+builder.Services.AddDbContext<PosUpdateContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("PosupdateEntities")));
 
 builder.Services.AddScoped<IDatabaseSchemaService, DatabaseSchemaService>();
 builder.Services.AddScoped<IDataGeneratorService, DataGeneratorService>();
