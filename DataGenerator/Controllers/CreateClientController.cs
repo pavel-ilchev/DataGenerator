@@ -1,3 +1,5 @@
+using DataGenerator.Models.Requests;
+
 namespace DataGenerator.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +17,9 @@ public class CreateClientController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateClient(string clientName, int locationsCount, Guid aspnetId)
+    public IActionResult CreateClient(ClientCreateRequest request)
     {
-        this.clientService.CreateClient(clientName, locationsCount, aspnetId);
+        this.clientService.CreateClient(request.ClientName, request.LocationsCount, request.AspnetId);
 
         return this.Ok();
     }
